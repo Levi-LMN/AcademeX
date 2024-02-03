@@ -98,9 +98,20 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/admin_dashboard', methods=['GET', 'POST'])
+@app.route('/admin_dashboard', methods=['GET'])
 @login_required
 def admin_dashboard():
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    users = User.query.all()
+    form = AdminUsersForm()
+
+    return render_template('admin/admin_dashboard.html', users=users, form=form)
+
+@app.route('/manage_user_roles', methods=['GET', 'POST'])
+@login_required
+def manage_user_roles():
     if current_user.role != 'Admin':
         return abort(403)  # Forbidden
 
@@ -115,10 +126,25 @@ def admin_dashboard():
 
         db.session.commit()
         flash('User roles changed successfully.', 'success')
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('manage_user_roles'))
 
     return render_template('admin/admin_dashboard.html', users=users, form=form)
 
+
+@app.route('/delete_user/<int:user_id>', methods=['GET'])
+@login_required
+def delete_user(user_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    user_to_delete = User.query.get(user_id)
+
+    if user_to_delete:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash('User deleted successfully.', 'success')
+
+    return redirect(url_for('manage_user_roles'))
 
 @app.route('/teacher_dashboard')
 @login_required

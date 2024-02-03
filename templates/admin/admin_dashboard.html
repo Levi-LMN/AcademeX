@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
 </head>
+
 <body>
-    <h1>Welcome to the Admin Dashboard, {{ current_user.username }}!</h1>
+    <h1>Admin Dashboard</h1>
 
-    <!-- Add content specific to the admin dashboard -->
+    <p>Welcome to the Admin Dashboard, {{ current_user.username }}!</p>
 
-    <h2>User Management:</h2>
-    <form method="post" action="">
+    <h2>Manage User Roles:</h2>
+    <form method="post" action="{{ url_for('manage_user_roles') }}">
         {{ form.hidden_tag() }}
         <table>
             <thead>
                 <tr>
                     <th>Username</th>
                     <th>Email</th>
-                    <th>Role</th>
+                    <th>Current Role</th>
                     <th>Change Role</th>
+                    <th>Delete User</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,11 +34,19 @@
                         <td>{{ user.role }}</td>
                         <td>
                             <select name="role_{{ user.id }}">
-                                <option value="Admin">Admin</option>
-                                <option value="Teacher">Teacher</option>
-                                <option value="Parent">Parent</option>
+                                {% if user.id == current_user.id %}
+                                    <option value="{{ current_user.role }}" selected>{{ current_user.role }} (You)</option>
+                                {% else %}
+                                    <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
+                                    <option value="Teacher" {% if user.role == 'Teacher' %}selected{% endif %}>Teacher</option>
+                                    <option value="Parent" {% if user.role == 'Parent' %}selected{% endif %}>Parent</option>
+                                {% endif %}
                             </select>
                         </td>
+                            <td>
+                                <button type="button" {% if user.id == current_user.id %}disabled{% endif %} onclick="confirmDelete('{{ user.id }}')">Delete</button>
+                            </td>
+
                     </tr>
                 {% endfor %}
             </tbody>
@@ -43,8 +54,16 @@
         <button type="submit">Change Roles</button>
     </form>
 
-    <!-- Add more content as needed -->
+    <script>
+        function confirmDelete(userId) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                window.location.href = "{{ url_for('delete_user', user_id=0) }}" + userId;
+            }
+        }
+    </script>
 
+    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
     <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
+
 </html>
