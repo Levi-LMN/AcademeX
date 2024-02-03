@@ -27,8 +27,19 @@ class User(db.Model, UserMixin):
 class Class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String(50), unique=True, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('class_name', name='uq_class_name_case_insensitive'),
+    )
+
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     students = db.relationship('Student', backref='class_students', lazy=True)
+
+    def edit_class(self, class_name, teacher_id):
+        self.class_name = class_name
+        self.teacher_id = teacher_id
+        db.session.commit()
+
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +82,13 @@ class RegistrationForm(FlaskForm):
     role = SelectField('Role', choices=[('Admin', 'Admin'), ('Teacher', 'Teacher'), ('Parent', 'Parent')], validators=[DataRequired()])
     submit = SubmitField('Register')
 
+# Update the AddClassForm in your app.py file
+class AddClassForm(FlaskForm):
+    class_name = StringField('Class Name', validators=[DataRequired()])
+    teacher_id = SelectField('Teacher', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Add Class')
+
+
 
 class AdminUsersForm(FlaskForm):
     submit = SubmitField('Change Role')
@@ -98,6 +116,7 @@ def index():
     return render_template('index.html')
 
 
+# Update the admin_dashboard route in your app.py file
 @app.route('/admin_dashboard', methods=['GET'])
 @login_required
 def admin_dashboard():
@@ -106,8 +125,11 @@ def admin_dashboard():
 
     users = User.query.all()
     form = AdminUsersForm()
+    add_class_form = AddClassForm()  # Instantiate AddClassForm here
+    classes = Class.query.all()
 
-    return render_template('admin/admin_dashboard.html', users=users, form=form)
+    return render_template('admin/admin_dashboard.html', users=users, form=form, add_class_form=add_class_form, classes=classes)
+
 
 @app.route('/manage_user_roles', methods=['GET', 'POST'])
 @login_required
@@ -128,7 +150,7 @@ def manage_user_roles():
         flash('User roles changed successfully.', 'success')
         return redirect(url_for('manage_user_roles'))
 
-    return render_template('admin/admin_dashboard.html', users=users, form=form)
+    return render_template('admin/users.html', users=users, form=form)
 
 
 @app.route('/delete_user/<int:user_id>', methods=['GET'])
@@ -230,6 +252,84 @@ def register():
             return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
+
+
+# Update the add_class route in your app.py file
+@app.route('/add_class', methods=['GET', 'POST'])
+@login_required
+def add_class():
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    form = AddClassForm()
+
+    # Filter teachers who don't have classes
+    teachers_without_classes = User.query.filter_by(role='Teacher').filter_by(classes_taught=None).all()
+    form.teacher_id.choices = [(teacher.id, teacher.username) for teacher in teachers_without_classes]
+
+    if not teachers_without_classes:
+        flash('No teachers available. Please add teachers before creating a class.', 'danger')
+
+    if form.validate_on_submit():
+        class_name = form.class_name.data
+        teacher_id = form.teacher_id.data
+
+        # Check if the class name is already taken
+        if Class.query.filter_by(class_name=class_name).first():
+            flash('Class name already taken. Please choose a different one.', 'danger')
+        else:
+            # Create a new class
+            new_class = Class(class_name=class_name, teacher_id=teacher_id)
+
+            # Add the class to the database
+            db.session.add(new_class)
+            db.session.commit()
+
+            flash('Class added successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/add_class.html', add_class_form=form)
+
+
+# Add this route to your app.py file
+@app.route('/delete_class/<int:class_id>', methods=['GET'])
+@login_required
+def delete_class(class_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    class_to_delete = Class.query.get(class_id)
+
+    if class_to_delete:
+        db.session.delete(class_to_delete)
+        db.session.commit()
+        flash('Class deleted successfully.', 'success')
+
+    return redirect(url_for('admin_dashboard'))
+
+
+# Update the edit_class route in your app.py file
+@app.route('/edit_class/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def edit_class(class_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    class_to_edit = Class.query.get(class_id)
+    form = AddClassForm(obj=class_to_edit)
+
+    # Populate the teacher_id choices with all teachers
+    form.teacher_id.choices = [(teacher.id, teacher.username) for teacher in User.query.filter_by(role='Teacher').all()]
+
+    if class_to_edit and form.validate_on_submit():
+        form.populate_obj(class_to_edit)
+        db.session.commit()
+
+        flash('Class details updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/edit_class.html', add_class_form=form)
+
 
 if __name__ == '__main__':
     with app.app_context():

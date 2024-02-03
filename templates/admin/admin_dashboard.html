@@ -6,6 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <!-- Include Bootstrap CSS and JS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
 </head>
 
 <body>
@@ -13,56 +19,45 @@
 
     <p>Welcome to the Admin Dashboard, {{ current_user.username }}!</p>
 
-    <h2>Manage User Roles:</h2>
-    <form method="post" action="{{ url_for('manage_user_roles') }}">
-        {{ form.hidden_tag() }}
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Current Role</th>
-                    <th>Change Role</th>
-                    <th>Delete User</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.role }}</td>
-                        <td>
-                            <select name="role_{{ user.id }}">
-                                {% if user.id == current_user.id %}
-                                    <option value="{{ current_user.role }}" selected>{{ current_user.role }} (You)</option>
-                                {% else %}
-                                    <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
-                                    <option value="Teacher" {% if user.role == 'Teacher' %}selected{% endif %}>Teacher</option>
-                                    <option value="Parent" {% if user.role == 'Parent' %}selected{% endif %}>Parent</option>
-                                {% endif %}
-                            </select>
-                        </td>
-                            <td>
-                                <button type="button" {% if user.id == current_user.id %}disabled{% endif %} onclick="confirmDelete('{{ user.id }}')">Delete</button>
-                            </td>
 
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <button type="submit">Change Roles</button>
-    </form>
 
-    <script>
-        function confirmDelete(userId) {
-            if (confirm("Are you sure you want to delete this user?")) {
-                window.location.href = "{{ url_for('delete_user', user_id=0) }}" + userId;
-            }
-        }
-    </script>
+<h3>Classes</h3>
+  {% if classes %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Class Name</th>
+          <th>Teacher</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for class in classes %}
+          <tr>
+            <td>{{ class.class_name }}</td>
+            <td>{{ class.teacher.username }}</td>
+            <td>
+              <a href="{{ url_for('edit_class', class_id=class.id) }}" class="btn btn-warning">Edit</a>
+              <a href="{{ url_for('delete_class', class_id=class.id) }}" class="btn btn-danger">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No classes available.</p>
+  {% endif %}
 
-    <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+
+
+
+    <p><a href="{{ url_for('manage_user_roles') }}">manage user roles</a></p>
+
+    <br>
+    <br>
+<p><a href="{{ url_for('add_class') }}">Add classes</a></p>
+    <br>
+    <br>
     <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 
