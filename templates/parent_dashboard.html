@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the Parent Dashboard, {{ current_user.username }}!</h1>
+
+    <!-- Add content specific to the parent dashboard -->
+
+    <h2>Your Children:</h2>
+    <ul>
+        {% for child in current_user.children %}
+            <li>{{ child.first_name }} {{ child.last_name }} - Class: {{ child.class_students.class_name }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Your Children's Grades:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Subject</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for child in current_user.children %}
+                {% for grade in child.grades %}
+                    <tr>
+                        <td>{{ child.first_name }} {{ child.last_name }}</td>
+                        <td>{{ grade.subject }}</td>
+                        <td>{{ grade.value }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Add more content as needed -->
+
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>

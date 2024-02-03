@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li style="color: {% if 'success' in message %}green{% else %}red{% endif %};">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <label for="username">Username:</label>
+        {{ form.username() }}
+        <label for="email">Email:</label>
+        {{ form.email() }}
+        <label for="password">Password:</label>
+        {{ form.password() }}
+        <label for="confirm_password">Confirm Password:</label>
+        {{ form.confirm_password() }}
+        <label for="role">Role:</label>
+        {{ form.role() }}
+        {{ form.submit() }}
+    </form>
+</body>
+</html>

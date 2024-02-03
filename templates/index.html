@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+</head>
+<body>
+    <h1>Welcome to the School Management System</h1>
+    {% if current_user.is_authenticated %}
+        <p>You are logged in as {{ current_user.username }} with role {{ current_user.role }}.</p>
+        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    {% else %}
+        <p><a href="{{ url_for('login') }}">Login</a></p>
+        <p><a href="{{ url_for('register') }}">Register</a></p>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+        {% if current_user.role == 'Admin' %}
+            <p><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></p>
+            <p><a href="{{ url_for('admin_users') }}">Admin Users</a></p>
+        {% elif current_user.role == 'Teacher' %}
+            <p><a href="{{ url_for('teacher_dashboard') }}">Teacher Dashboard</a></p>
+        {% elif current_user.role == 'Parent' %}
+            <p><a href="{{ url_for('parent_dashboard') }}">Parent Dashboard</a></p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
