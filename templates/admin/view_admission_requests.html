@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- templates/admin/view_admission_requests.html -->
+
+
+{% block content %}
+  <h2>Admission Requests</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Parent</th>
+        <th>Student</th>
+        <th>Admission Number</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for request in admission_requests %}
+        <tr>
+          <td>{{ request.parent.username }}</td>
+          <td>{{ request.student.first_name }} {{ request.student.last_name }}</td>
+          <td>{{ request.admission_number }}</td>
+          <td>{{ request.status }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+
+</body>
+</html>

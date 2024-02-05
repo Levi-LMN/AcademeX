@@ -44,7 +44,7 @@ class Student(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     admission_number = db.Column(db.String(20), unique=True, nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Change to nullable=True
     grades = db.relationship('Grade', backref='student_grades', lazy=True)
     attendance = db.relationship('Attendance', backref='student_attendance', lazy=True)
 
@@ -68,17 +68,6 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
 
-class AdmissionRequest(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    admission_number = db.Column(db.String(20), nullable=False)
-    status = db.Column(db.String(20), default='Pending')  # Status can be 'Pending', 'Approved', or 'Rejected'
-
-class AdmissionRequestForm(FlaskForm):
-    student_id = SelectField('Student', coerce=int, validators=[DataRequired()])
-    admission_number = StringField('Admission Number', validators=[DataRequired()])
-    submit = SubmitField('Submit Request')
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -380,6 +369,8 @@ def edit_class(class_id):
 
 # ... existing code ...
 
+# ... (existing imports)
+
 @app.route('/add_student', methods=['GET', 'POST'])
 @login_required
 def add_student():
@@ -389,13 +380,13 @@ def add_student():
     form.class_id.choices = [(c.id, c.class_name) for c in Class.query.all()]
 
     if form.validate_on_submit():
-        # Create a new student
+        # Create a new student with parent_id set to None
         new_student = Student(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             admission_number=form.admission_number.data,
             class_id=form.class_id.data,
-            parent_id=current_user.id  # Assuming the admin user is the parent
+            parent_id=None  # Set parent_id to None initially
         )
 
         # Add the student to the database
