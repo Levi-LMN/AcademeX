@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- view_student.html -->
+
+
+
+{% block content %}
+  <h1>Student Details</h1>
+  <p>Name: {{ student.first_name }} {{ student.last_name }}</p>
+  <p>Admission Number: {{ student.admission_number }}</p>
+  <p>Class: {{ student.class_students.class_name }}</p>
+  <!-- Add other details as needed -->
+{% endblock %}
+
+</body>
+</html>

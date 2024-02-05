@@ -9,38 +9,15 @@
 <body>
     <h1>Welcome to the Parent Dashboard, {{ current_user.username }}!</h1>
 
-    <!-- Add content specific to the parent dashboard -->
+<!-- parent_dashboard.html -->
 
-    <h2>Your Children:</h2>
-    <ul>
-        {% for child in current_user.children %}
-            <li>{{ child.first_name }} {{ child.last_name }} - Class: {{ child.class_students.class_name }}</li>
-        {% endfor %}
-    </ul>
 
-    <h2>Your Children's Grades:</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Student</th>
-                <th>Subject</th>
-                <th>Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for child in current_user.children %}
-                {% for grade in child.grades %}
-                    <tr>
-                        <td>{{ child.first_name }} {{ child.last_name }}</td>
-                        <td>{{ grade.subject }}</td>
-                        <td>{{ grade.value }}</td>
-                    </tr>
-                {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <!-- Add more content as needed -->
+  <h1>Welcome to the Parent Dashboard, {{ current_user.first_name }}!</h1>
+
+  <h2>Parent Dashboard</h2>
+
+
 
     <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>

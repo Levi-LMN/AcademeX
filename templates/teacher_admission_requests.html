@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Admission Requests</title>
+</head>
+<body>
+    <!-- templates/teacher_admission_requests.html -->
+
+
+{% block content %}
+  <h2>Pending Admission Requests</h2>
+  {% if admission_requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>Admission Number</th>
+          <th>Student Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in admission_requests %}
+          <tr>
+            <td>{{ request.admission_number }}</td>
+            <td>{{ request.student.first_name }} {{ request.student.last_name }}</td>
+            <td>
+              <a href="{{ url_for('approve_admission', admission_id=request.id) }}">Approve</a>
+              <a href="{{ url_for('reject_admission', admission_id=request.id) }}">Reject</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No pending admission requests.</p>
+  {% endif %}
+{% endblock %}
+
+
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>

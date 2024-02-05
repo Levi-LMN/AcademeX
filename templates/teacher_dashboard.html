@@ -9,5 +9,37 @@
 <body>
     <h1>Welcome to the Teacher Dashboard, {{ current_user.username }}</h1>
     <p>View and manage your classes and students here.</p>
+<!-- templates/teacher_dashboard.html -->
+
+
+{% block content %}
+  <h2>Teacher Dashboard</h2>
+  {% if teacher_class %}
+    <h3>Class: {{ teacher_class.class_name }}</h3>
+    {% if students %}
+      <table>
+        <thead>
+          <tr>
+            <th>Admission Number</th>
+            <th>Student Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+            <tr>
+              <td>{{ student.admission_number }}</td>
+              <td>{{ student.first_name }} {{ student.last_name }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No students in the class yet.</p>
+    {% endif %}
+  {% else %}
+    <p>You are not assigned to any class yet.</p>
+  {% endif %}
+{% endblock %}
+
 </body>
 </html>

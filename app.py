@@ -6,6 +6,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo
 from flask import request
+from flask import Flask, render_template, flash, redirect, url_for
+
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'levi5769!'
@@ -27,11 +30,6 @@ class User(db.Model, UserMixin):
 class Class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String(50), unique=True, nullable=False)
-
-    __table_args__ = (
-        db.UniqueConstraint('class_name', name='uq_class_name_case_insensitive'),
-    )
-
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     students = db.relationship('Student', backref='class_students', lazy=True)
 
@@ -40,15 +38,16 @@ class Class(db.Model):
         self.teacher_id = teacher_id
         db.session.commit()
 
-
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    date_of_birth = db.Column(db.DateTime, nullable=False)
+    admission_number = db.Column(db.String(20), unique=True, nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     grades = db.relationship('Grade', backref='student_grades', lazy=True)
+    attendance = db.relationship('Attendance', backref='student_attendance', lazy=True)
+
 
 class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,6 +68,18 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
 
+class AdmissionRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    admission_number = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(20), default='Pending')  # Status can be 'Pending', 'Approved', or 'Rejected'
+
+class AdmissionRequestForm(FlaskForm):
+    student_id = SelectField('Student', coerce=int, validators=[DataRequired()])
+    admission_number = StringField('Admission Number', validators=[DataRequired()])
+    submit = SubmitField('Submit Request')
+
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -87,6 +98,16 @@ class AddClassForm(FlaskForm):
     class_name = StringField('Class Name', validators=[DataRequired()])
     teacher_id = SelectField('Teacher', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Add Class')
+
+
+# Update the AddStudentForm in your forms.py file
+class AddStudentForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    admission_number = StringField('Admission Number', validators=[DataRequired()])
+    class_id = SelectField('Class', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Add Student')
+
 
 
 
@@ -168,12 +189,25 @@ def delete_user(user_id):
 
     return redirect(url_for('manage_user_roles'))
 
+# Update the teacher_dashboard route in your app.py file
 @app.route('/teacher_dashboard')
 @login_required
 def teacher_dashboard():
     if current_user.role != 'Teacher':
         return abort(403)  # Forbidden
-    return render_template('teacher_dashboard.html')
+
+    # Assuming a teacher can be assigned to at most one class
+    teacher_class = Class.query.filter_by(teacher_id=current_user.id).first()
+
+    if not teacher_class:
+        flash('You are not assigned to any class yet.', 'info')
+        return render_template('teacher_dashboard.html', teacher_class=None, students=[], flash=flash)
+
+    # Get the students for the teacher's class
+    students = Student.query.filter_by(class_id=teacher_class.id).all()
+
+    return render_template('teacher_dashboard.html', teacher_class=teacher_class, students=students, flash=flash)
+
 
 @app.route('/parent_dashboard')
 @login_required
@@ -291,7 +325,9 @@ def add_class():
     return render_template('admin/add_class.html', add_class_form=form)
 
 
-# Add this route to your app.py file
+
+# ... (existing imports)
+
 @app.route('/delete_class/<int:class_id>', methods=['GET'])
 @login_required
 def delete_class(class_id):
@@ -301,9 +337,20 @@ def delete_class(class_id):
     class_to_delete = Class.query.get(class_id)
 
     if class_to_delete:
-        db.session.delete(class_to_delete)
-        db.session.commit()
-        flash('Class deleted successfully.', 'success')
+        try:
+            # Delete related students
+            students_to_delete = Student.query.filter_by(class_id=class_id).all()
+            for student in students_to_delete:
+                db.session.delete(student)
+
+            db.session.delete(class_to_delete)
+            db.session.commit()
+            flash('Class deleted successfully.', 'success')
+
+        except IntegrityError:
+            # Handle IntegrityError due to foreign key constraints
+            db.session.rollback()
+            flash('Error: There are related records in the database.', 'danger')
 
     return redirect(url_for('admin_dashboard'))
 
@@ -329,6 +376,105 @@ def edit_class(class_id):
         return redirect(url_for('admin_dashboard'))
 
     return render_template('admin/edit_class.html', add_class_form=form)
+
+
+# ... existing code ...
+
+@app.route('/add_student', methods=['GET', 'POST'])
+@login_required
+def add_student():
+    form = AddStudentForm()
+
+    # Populate the class choices in the form
+    form.class_id.choices = [(c.id, c.class_name) for c in Class.query.all()]
+
+    if form.validate_on_submit():
+        # Create a new student
+        new_student = Student(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            admission_number=form.admission_number.data,
+            class_id=form.class_id.data,
+            parent_id=current_user.id  # Assuming the admin user is the parent
+        )
+
+        # Add the student to the database
+        db.session.add(new_student)
+        db.session.commit()
+
+        flash('Student added successfully', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/add_student.html', title='Add Student', form=form)
+
+
+# Add this route to your app.py file
+@app.route('/view_all_students', methods=['GET'])
+@login_required
+def view_all_students():
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    students = Student.query.all()
+
+    return render_template('admin/view_all_students.html', students=students)
+
+# Add this route to your app.py file
+@app.route('/view_student/<int:student_id>', methods=['GET'])
+@login_required
+def view_student(student_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    student = Student.query.get(student_id)
+
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/view_student.html', student=student)
+
+
+@app.route('/edit_student/<int:student_id>', methods=['GET', 'POST'])
+@login_required
+def edit_student(student_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    student = Student.query.get(student_id)
+
+    if not student:
+        flash('Student not found.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    form = AddStudentForm(obj=student)
+    form.class_id.choices = [(c.id, c.class_name) for c in Class.query.all()]
+
+    if form.validate_on_submit():
+        form.populate_obj(student)
+        db.session.commit()
+
+        flash('Student details updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/edit_student.html', title='Edit Student', form=form, student=student)
+
+
+@app.route('/delete_student/<int:student_id>', methods=['GET'])
+@login_required
+def delete_student(student_id):
+    if current_user.role != 'Admin':
+        return abort(403)  # Forbidden
+
+    student_to_delete = Student.query.get(student_id)
+
+    if student_to_delete:
+        db.session.delete(student_to_delete)
+        db.session.commit()
+        flash('Student deleted successfully.', 'success')
+
+    return redirect(url_for('admin_dashboard'))
+
 
 
 if __name__ == '__main__':
