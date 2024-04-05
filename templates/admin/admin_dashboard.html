@@ -1,68 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <!-- Include Bootstrap CSS and JS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
 </head>
-
 <body>
-    <h1>Admin Dashboard</h1>
+    <h1>Welcome, Admin!</h1>
+    <p>This is your dashboard.</p>
+    <ul>
+        <li><a href="{{ url_for('manage_users') }}">Manage Users</a></li>
+        <li><a href="{{ url_for('manage_courses') }}">Manage Courses</a></li>
+<!--        add course-->
+        <li><a href="{{ url_for('add_course') }}">Add Course</a></li>
+<!--        add class-->
+        <li><a href="{{ url_for('add_class') }}">Add Class</a></li>
 
-    <p>Welcome to the Admin Dashboard, {{ current_user.username }}!</p>
-
-
-
-<h3>Classes</h3>
-  {% if classes %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Class Name</th>
-          <th>Teacher</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for class in classes %}
-          <tr>
-            <td>{{ class.class_name }}</td>
-            <td>{{ class.teacher.username }}</td>
-            <td>
-              <a href="{{ url_for('edit_class', class_id=class.id) }}" class="btn btn-warning">Edit</a>
-              <a href="{{ url_for('delete_class', class_id=class.id) }}" class="btn btn-danger">Delete</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No classes available.</p>
-  {% endif %}
-
-
-
-
-    <p><a href="{{ url_for('manage_user_roles') }}">manage user roles</a></p>
-
-    <br>
-    <br>
-<p><a href="{{ url_for('add_class') }}">Add classes</a></p>
-    <br>
-    <p><a href="{{ url_for('add_student') }}">Add Students</a></p>
-    <br>
-    <p><a href="{{ url_for('logout') }}">Logout</a></p>
-<br>
- <!-- Add a link to the new page -->
-  <p><a href="{{ url_for('view_all_students') }}">View All Students</a></p>
+        <!-- Add more links as needed -->
+    </ul>
 </body>
-
 </html>

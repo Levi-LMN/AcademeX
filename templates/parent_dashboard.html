@@ -1,24 +1,31 @@
+<!-- parent_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard</title>
 </head>
 <body>
-    <h1>Welcome to the Parent Dashboard, {{ current_user.username }}!</h1>
-
-<!-- parent_dashboard.html -->
 
 
 
-  <h1>Welcome to the Parent Dashboard, {{ current_user.first_name }}!</h1>
+  <h1>Welcome to the Parent Dashboard</h1>
 
-  <h2>Parent Dashboard</h2>
+  <h2>All Students</h2>
+  <ul>
+    {% for student in all_students %}
+      <li>
+        {{ student.first_name }} {{ student.last_name }}
+        <form method="post" action="{{ url_for('send_access_request', student_id=student.id) }}">
+          {{ form.hidden_tag() }}
+          <input type="submit" value="Send Access Request">
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
 
 
 
-    <p><a href="{{ url_for('logout') }}">Logout</a></p>
 </body>
 </html>

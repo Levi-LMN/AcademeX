@@ -1,46 +1,25 @@
+<!-- add_class.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Add Class</title>
 </head>
 <body>
+    <h1>Add Class</h1>
+    <form action="{{ url_for('add_class') }}" method="POST">
+        <label for="name">Class Name:</label><br>
+        <input type="text" id="name" name="name"><br><br>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class="flashes">
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+        <label for="teacher">Teacher:</label><br>
+        <select id="teacher" name="teacher">
+            {% for teacher in teachers %}
+                <option value="{{ teacher.user.id }}">{{ teacher.user.first_name }} {{ teacher.user.last_name }}</option>
+            {% endfor %}
+        </select><br><br>
 
-<h2>Add Class</h2>
-<form method="POST" action="{{ url_for('add_class') }}">
-  {{ add_class_form.hidden_tag() }}
-  <div class="form-group">
-    {{ add_class_form.class_name.label }}
-    {{ add_class_form.class_name(class="form-control") }}
-    {% for error in add_class_form.class_name.errors %}
-      <div class="alert alert-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <div class="form-group">
-    {{ add_class_form.teacher_id.label }}
-    {% if add_class_form.teacher_id.choices %}
-      {{ add_class_form.teacher_id(class="form-control") }}
-    {% else %}
-      <p>No teachers available. Please add teachers before creating a class.</p>
-    {% endif %}
-    {% for error in add_class_form.teacher_id.errors %}
-      <div class="alert alert-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <button type="submit" class="btn btn-primary">Add Class</button>
-</form>
-
+        <input type="submit" value="Add Class">
+    </form>
 </body>
 </html>

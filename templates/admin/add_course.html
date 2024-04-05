@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Course</title>
+</head>
+<body>
+    <h1>Add Course</h1>
+    <form action="{{ url_for('add_course') }}" method="post">
+        <label for="name">Course Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+
+        <button type="submit">Add Course</button>
+    </form>
+</body>
+</html>
