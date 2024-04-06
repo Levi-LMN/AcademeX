@@ -2,20 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Student Details</title>
 </head>
 <body>
-<!-- view_student.html -->
+    <h1>Student Details</h1>
 
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Admission Number</td>
+                <td>{{ student.admission_number }}</td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td>{{ student.name }}</td>
+            </tr>
+            <!-- Add more attributes as needed -->
+        </tbody>
+    </table>
 
-
-{% block content %}
-  <h1>Student Details</h1>
-  <p>Name: {{ student.first_name }} {{ student.last_name }}</p>
-  <p>Admission Number: {{ student.admission_number }}</p>
-  <p>Class: {{ student.class_students.class_name }}</p>
-  <!-- Add other details as needed -->
-{% endblock %}
-
+    <!-- Link to go back to the class students page -->
+    <a href="{{ url_for('view_class_students', class_id=student.class_id) }}">Back to Class Students</a>
 </body>
 </html>

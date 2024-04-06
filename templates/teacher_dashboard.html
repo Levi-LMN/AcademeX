@@ -1,14 +1,27 @@
 <!-- teacher_dashboard.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard</title>
 </head>
 <body>
-    <h1>Welcome, {{ current_user.first_name }}!</h1>
-    <p>This is your teacher dashboard.</p>
-    <!-- Add more content as needed -->
+    <h1>Welcome to the Teacher Dashboard</h1>
+
+    <h2>Classes Taught:</h2>
+    <ul>
+        {% for class in classes_taught %}
+            <li>{{ class.name }}</li>
+        {% endfor %}
+    </ul>
+
+
+<!--link to view students-->
+    <a href="{{ url_for('view_students') }}">View Students</a>
+<!--link to view association requests-->
+    <a href="view_and_manage_association_requests">View Association Requests</a>
 </body>
 </html>

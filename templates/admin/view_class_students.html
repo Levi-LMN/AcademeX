@@ -2,29 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Students</title>
+    <title>View Class Students</title>
 </head>
 <body>
-    <h1>All Students</h1>
+    <h1>Students of Class: {{ class_.name }}</h1>
 
-    <table>
+    <table border="1">
         <thead>
             <tr>
                 <th>Admission Number</th>
                 <th>Name</th>
-                <th>Class</th>
-                <!-- Add more columns as needed -->
+                <th>View Details</th> <!-- New column for the link -->
             </tr>
         </thead>
         <tbody>
-            {% for student, class_ in students_with_class %}
+            {% for student in students %}
             <tr>
                 <td>{{ student.admission_number }}</td>
                 <td>{{ student.name }}</td>
-                <td>{{ class_.name }}</td>
-                <!-- Add more columns as needed -->
+                <!-- Link to view details of this student -->
+                <td><a href="{{ url_for('view_student_details', student_id=student.id) }}">View Details</a></td>
             </tr>
             {% endfor %}
         </tbody>

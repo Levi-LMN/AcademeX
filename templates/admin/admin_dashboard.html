@@ -11,10 +11,16 @@
     <ul>
         <li><a href="{{ url_for('manage_users') }}">Manage Users</a></li>
         <li><a href="{{ url_for('manage_courses') }}">Manage Courses</a></li>
+        <li><a href="{{ url_for('manage_classes') }}">Manage Classes</a></li>
 <!--        add course-->
         <li><a href="{{ url_for('add_course') }}">Add Course</a></li>
 <!--        add class-->
         <li><a href="{{ url_for('add_class') }}">Add Class</a></li>
+<!--        add student-->
+        <li><a href="{{ url_for('add_student') }}">Add Student</a></li>
+<!--        view all students-->
+        <li><a href="{{ url_for('view_all_students') }}">View All Students</a></li>
+
 
         <!-- Add more links as needed -->
     </ul>

@@ -2,31 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student</title>
 </head>
 <body>
-{% block content %}
-  <h2>Add Student</h2>
-  <form method="post">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-      {{ form.first_name.label(class="form-control-label") }}
-      {{ form.first_name(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.last_name.label(class="form-control-label") }}
-      {{ form.last_name(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.admission_number.label(class="form-control-label") }}
-      {{ form.admission_number(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.class_id.label(class="form-control-label") }}
-      {{ form.class_id(class="form-control") }}
-    </div>
-    <button type="submit" class="btn btn-primary">Add Student</button>
-  </form>
-{% endblock %}
+    <h1>Add Student</h1>
+    <form action="{{ url_for('add_student') }}" method="post">
+        <label for="admission_number">Admission Number:</label>
+        <input type="text" id="admission_number" name="admission_number" required><br><br>
+        <label for="student_name">Student Name:</label>
+        <input type="text" id="student_name" name="student_name" required><br><br>
+        <label for="class_id">Class:</label>
+        <select id="class_id" name="class_id" required>
+            {% for class in classes %}
+                <option value="{{ class.id }}">{{ class.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <button type="submit">Add Student</button>
+    </form>
 </body>
 </html>

@@ -1,31 +1,42 @@
-<!-- parent_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard</title>
 </head>
 <body>
+    <h1>Welcome to the Parent Dashboard</h1>
 
+    <!-- Form to send association request -->
+    <h2>Send Association Request:</h2>
+    <form action="{{ url_for('send_association_request') }}" method="post">
+        <label for="student_admission_number">Student Admission Number:</label>
+        <input type="text" id="student_admission_number" name="student_admission_number" required>
+        <button type="submit">Send Request</button>
+    </form>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-  <h1>Welcome to the Parent Dashboard</h1>
-
-  <h2>All Students</h2>
-  <ul>
-    {% for student in all_students %}
-      <li>
-        {{ student.first_name }} {{ student.last_name }}
-        <form method="post" action="{{ url_for('send_access_request', student_id=student.id) }}">
-          {{ form.hidden_tag() }}
-          <input type="submit" value="Send Access Request">
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
-
-
-
+    <!-- Show children if association request status is accepted -->
+    <h2>My Children:</h2>
+    <ul>
+        {% for student in current_user.parent.students %}
+            {% for request in student.association_requests %}
+                {% if request.status == 'accepted' %}
+                    <li><a href="{{ url_for('child_details', student_id=student.id) }}">{{ student.name }}</a></li>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </ul>
 </body>
 </html>

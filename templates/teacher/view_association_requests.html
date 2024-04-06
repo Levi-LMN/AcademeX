@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Association Requests</title>
+</head>
+<body>
+    <h1>Association Requests</h1>
+    <ul>
+        {% for request in association_requests %}
+    <p>Parent: {{ request.parent.user.first_name }} {{ request.parent.user.last_name }} - Student: {{ request.student.name }}</p>
+    <form method="post">
+        <input type="hidden" name="request_id" value="{{ request.id }}">
+        <button type="submit" name="action" value="accept">Accept</button>
+        <button type="submit" name="action" value="decline">Decline</button>
+    </form>
+{% endfor %}
+
+    </ul>
+</body>
+</html>

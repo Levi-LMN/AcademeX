@@ -15,6 +15,7 @@
                 <th>Class ID</th>
                 <th>Class Name</th>
                 <th>Teacher Name</th>
+                <th>View Students</th> <!-- New column for the link -->
             </tr>
         </thead>
         <tbody>
@@ -23,6 +24,8 @@
                 <td>{{ class.id }}</td>
                 <td>{{ class.name }}</td>
                 <td>{{ teacher_names[class.teacher_id] }}</td>
+                <!-- Link to view students of this class -->
+                <td><a href="{{ url_for('view_class_students', class_id=class.id) }}">View Students</a></td>
             </tr>
             {% endfor %}
         </tbody>
