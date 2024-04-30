@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Grades</title>
+    <!-- You can link CSS stylesheets or include any necessary scripts here -->
+</head>
+<body>
+    <header>
+        <h1>Add Grades</h1>
+    </header>
+    <main>
+        <form action="{{ url_for('add_grades') }}" method="POST">
+            <label for="course">Select Course:</label>
+            <select name="course_id" id="course">
+                {% for course in courses %}
+                <option value="{{ course.id }}">{{ course.name }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="student">Select Student:</label>
+            <select name="student_id" id="student">
+                {% for student in students %}
+                <option value="{{ student.id }}">{{ student.name }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="grade">Enter Grade:</label>
+            <input type="text" name="grade" id="grade" required><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </main>
+    <footer>
+        <!-- Footer content -->
+    </footer>
+</body>
+</html>

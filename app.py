@@ -171,6 +171,11 @@ def logout():
     logout_user()  # Log out the user
     return redirect(url_for('login'))
 
+# Define the homepage route
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 
 # Dashboard route
 @app.route('/dashboard')
@@ -503,6 +508,46 @@ def view_student_details(student_id):
 
     # Pass the student object to the template
     return render_template('admin/view_student.html', student=student)
+
+# Define route for teacher to add students' grades
+@app.route('/add_grades', methods=['GET', 'POST'])
+@login_required
+def add_grades():
+    # Check if the current user is a teacher
+    if current_user.role != 'Teacher':
+        flash('You are not authorized to access this page.', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Handle form submission
+    if request.method == 'POST':
+        # Get form data
+        student_id = request.form.get('student_id')
+        course_id = request.form.get('course_id')
+        grade = request.form.get('grade')
+
+        # Validate form data (you can add more validation if needed)
+
+        # Create a new Grade object and add it to the database
+        new_grade = Grade(student_id=student_id, course_id=course_id, grade=grade)
+        db.session.add(new_grade)
+        db.session.commit()
+
+        flash('Grade added successfully!', 'success')
+
+        # Redirect to the same page to clear the form
+        return redirect(url_for('add_grades'))
+
+    # Query classes taught by the teacher
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    teacher_class = teacher.classes[0]  # Assuming a teacher teaches only one class
+
+    # Query students enrolled in the teacher's class
+    students = teacher_class.students
+
+    # Query courses taught in the teacher's class
+    courses_taught = teacher_class.courses
+
+    return render_template('teacher/add_grades.html', courses=courses_taught, students=students)
 
 
 if __name__ == '__main__':

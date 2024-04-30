@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal-like Interface</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+        }
+        #terminal {
+            background-color: #000;
+            border-radius: 5px;
+            padding: 20px;
+            width: 400px;
+            height: 300px;
+            overflow-y: auto;
+            margin: 20px auto;
+        }
+        .prompt {
+            color: #00ff00;
+        }
+        .input {
+            color: #ffffff;
+            display: inline;
+        }
+        .output {
+            color: #d4d4d4;
+            display: inline;
+        }
+        input {
+            border: none;
+            background-color: transparent;
+            outline: none;
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 14px;
+            width: 90%;
+            margin: 10px 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <p><span class="prompt">$ </span><span class="input" id="nameInput"></span></p>
+    </div>
+    <input type="text" id="input" autofocus>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const inputField = document.getElementById('input');
+        const nameInput = document.getElementById('nameInput');
+        let question = 1; // Track the current question
+
+        inputField.addEventListener('keydown', function(event) {
+            if (event.key === "Enter") {
+                const answer = inputField.value;
+                if (question === 1) {
+                    nameInput.textContent = answer; // Store the answer to the first question
+                    const nextPrompt = document.createElement('p');
+                    nextPrompt.innerHTML = '<span class="prompt">$ </span><span class="input" id="question2Input">What is your age?</span>';
+                    terminal.appendChild(nextPrompt);
+                    inputField.value = ''; // Clear input field
+                    inputField.focus();
+                    question = 2; // Move to the next question
+                } else if (question === 2) {
+                    const age = answer;
+                    const greeting = `Hello, ${nameInput.textContent}! You are ${age} years old. Welcome to our website.`;
+                    const message = document.createElement('p');
+                    const prompt = document.createElement('span');
+                    const output = document.createElement('span');
+
+                    prompt.textContent = '$ ';
+                    prompt.classList.add('prompt');
+                    output.textContent = greeting;
+                    output.classList.add('output');
+
+                    message.appendChild(prompt);
+                    message.appendChild(output);
+
+                    terminal.appendChild(message);
+                    inputField.value = ''; // Clear input field
+                    inputField.focus();
+                }
+            } else if (event.key === "Backspace") {
+                event.preventDefault();
+                if (question === 1) {
+                    nameInput.textContent = nameInput.textContent.slice(0, -1); // Remove the last character
+                }
+            } else {
+                if (question === 1) {
+                    nameInput.textContent += event.key;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
